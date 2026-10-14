@@ -1,0 +1,25 @@
+name: wiki-check
+
+# Deterministic health checks on every push and pull request: duplicate page names, missing or
+# wrong frontmatter, and broken links that are not in .vault-meta/lint-baseline.json.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run wiki-check
+        run: python3 scripts/wiki-check.py --ci --report wiki-check-report.md
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-check-report
+          path: wiki-check-report.md
